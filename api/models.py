@@ -2,6 +2,14 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 
+COUNTRY_CHOICES = [
+        ("ru", "Russia"),
+        ("us", "USA"),
+        ("en", "England"),
+        ("fr", "France")
+    ]
+
+
 class Token(models.Model):
     name = models.CharField(max_length=128)
     value = models.IntegerField()
@@ -22,15 +30,11 @@ class Wallet(models.Model):
 
 
 class User(AbstractUser):
-    COUNTRY_CHOICES = [
-        ("ru", "Russia"),
-        ("us", "USA"),
-        ("en", "England"),
-        ("fr", "France")
-    ]
+    
     image = models.ImageField(upload_to='static/profiles')
     phone = models.CharField(max_length=12)
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True)
 
 
 class Transaction(models.Model):
