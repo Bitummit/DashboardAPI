@@ -10,8 +10,8 @@ COUNTRY_CHOICES = [
 ]
 
 STATUS_CHOICES = [
-    ('a', 'Active'),
-    ('i', 'Inactive')
+    ('Active', 'Active'),
+    ('Inactive', 'Inactive')
 ]
 
 
@@ -59,7 +59,7 @@ class User(AbstractUser):
     image = models.ImageField(upload_to='static/profiles', blank=True, null=True)
     phone = models.CharField(max_length=12, blank=True, null=True)
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES, blank=True, null=True)
-    status = models.CharField(max_length=2, choices=STATUS_CHOICES, default='a')
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
 
 
