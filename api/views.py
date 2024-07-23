@@ -25,4 +25,6 @@ class UserListView(generics.ListCreateAPIView):
             return BaseUserSerializer
         return self.serializer_class
 
+    ''' Create wallet auto adding'''
+
 

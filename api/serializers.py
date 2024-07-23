@@ -28,10 +28,10 @@ import re
 
 class BaseUserSerializer(serializers.ModelSerializer):
     '''Users List'''
-
+    balance = serializers.ReadOnlyField(source="wallet.balance")
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email", "username", "image", "phone", "country", "created_at"]
+        fields = ["first_name", "last_name", "email", "username", "image", "phone", "country", "status", "balance", "created_at"]
 
     def validate_phone(self, value):
         validate_phone_number_pattern = "^\\+?[1-9][0-9]{7,14}$"
