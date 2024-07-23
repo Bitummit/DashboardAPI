@@ -16,7 +16,7 @@ user post
 class UserListView(generics.ListCreateAPIView):
     '''ListCreate'''
     serializer_class = ShortUserSerializer
-    queryset = User.objects.filter(is_staff=False).all()
+    queryset = User.objects.filter(is_staff=False).all().order_by('pk')
     pagination_class = StandardPagination
     # pagination_class = pagination.LimitOffsetPagination
 

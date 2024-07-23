@@ -46,7 +46,7 @@ class Wallet(models.Model):
             total += token.total_token_value
         total = "%.2f" % total
         # total += token.total_token_value for token in self.tokens.all()
-        return total 
+        return total if self.tokens.all() else 0
 
     def __str__(self):
         return f"{self.user}'s wallet"
@@ -59,7 +59,7 @@ class User(AbstractUser):
     image = models.ImageField(upload_to='static/profiles', blank=True, null=True)
     phone = models.CharField(max_length=12, blank=True, null=True)
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES, blank=True, null=True)
-    status = models.CharField(max_length=12, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default="Active")
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
 
 
