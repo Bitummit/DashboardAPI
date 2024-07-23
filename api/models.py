@@ -13,7 +13,7 @@ COUNTRY_CHOICES = [
 class Token(models.Model):
     name = models.CharField(max_length=128)
     value = models.IntegerField()
-    check_date = models.DateField()
+    check_date = models.DateField(auto_now_add=True, blank=True)
 
 
 class Wallet(models.Model):
@@ -31,9 +31,10 @@ class Wallet(models.Model):
 
 class User(AbstractUser):
     
-    image = models.ImageField(upload_to='static/profiles')
-    phone = models.CharField(max_length=12)
-    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
+    email = models.EmailField(blank=True, unique=True)
+    image = models.ImageField(upload_to='static/profiles', blank=True, null=True)
+    phone = models.CharField(max_length=12, blank=True, null=True)
+    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
 
 

@@ -26,14 +26,32 @@ import re
     #     instance.save()
     #     return instance
 
-class UserSerializer(serializers.ModelSerializer):
+class BaseUserSerializer(serializers.ModelSerializer):
+    '''Users List'''
 
     class Meta:
         model = User
-        fields = ["email", "login", "image", "phone", "country", "created_at"]
+        fields = ["first_name", "last_name", "email", "username", "image", "phone", "country", "created_at"]
 
     def validate_phone(self, value):
         validate_phone_number_pattern = "^\\+?[1-9][0-9]{7,14}$"
-        return True if re.match(validate_phone_number_pattern, value) else False
+        if re.match(validate_phone_number_pattern, value):
+            return value
+        raise serializers.ValidationError("Phone number don't match teh pattern")
 
-    
+
+class ShortUserSerializer(BaseUserSerializer):
+    '''Only POST'''
+
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email", "username", "phone", "password"]
+
+'''
+Sign in ("email", "username", "phone", "password")
+Sign up ()
+Get users ("email", "username", "image", "phone", "country", "created_at")
+Create user ()
+
+User email username password iamge phone country created at
+'''
