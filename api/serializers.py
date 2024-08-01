@@ -1,6 +1,12 @@
 from rest_framework import serializers
-from .models import User, COUNTRY_CHOICES
+from .models import User
 import re
+import django.contrib.auth.password_validation as validators
+from rest_framework_simplejwt.serializers import (
+    TokenObtainPairSerializer
+)
+from rest_framework.validators import UniqueValidator
+
 
 # class UserSerializer(serializers.Serializer):
 #     '''Method to understand Serializer'''
@@ -26,6 +32,49 @@ import re
     #     instance.save()
     #     return instance
 
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['username'] = user.username
+        token['email'] = user.email
+
+        return token
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    password = serializers.CharField(
+        write_only=True, required=True, validators=[validators.validate_password])
+    password2 = serializers.CharField(write_only=True, required=True)
+    
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password', 'password2')
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError(
+                {"password": "Password fields didn't match."})
+
+        return attrs
+
+    def create(self, validated_data):
+        user = User.objects.create(
+            username=validated_data['username'],
+            email=validated_data['email'],
+        )
+
+        user.set_password(validated_data['password'])
+        user.save()
+
+        return user
+
+
 class BaseUserSerializer(serializers.ModelSerializer):
     '''Users List'''
     balance = serializers.ReadOnlyField(source="wallet.balance")
@@ -37,7 +86,7 @@ class BaseUserSerializer(serializers.ModelSerializer):
         validate_phone_number_pattern = "^\\+?[1-9][0-9]{7,14}$"
         if re.match(validate_phone_number_pattern, value):
             return value
-        raise serializers.ValidationError("Phone number don't match teh pattern")
+        raise serializers.ValidationError("Phone number don't match the pattern")
 
 
 class ShortUserSerializer(BaseUserSerializer):
