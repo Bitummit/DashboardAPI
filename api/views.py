@@ -41,3 +41,6 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
 
+'''
+Update token price with celery -> create tokenHistory entity -> update token
+'''

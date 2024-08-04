@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from functools import cached_property
 
 
 COUNTRY_CHOICES = [
@@ -23,7 +24,6 @@ class Token(models.Model):
 
     def __str__(self):
         return self.short_name
-    
 
 
 class TokenInWallet(models.Model):
@@ -31,7 +31,7 @@ class TokenInWallet(models.Model):
     amount = models.DecimalField(max_digits=20, decimal_places=10)
     wallet = models.ForeignKey('Wallet', related_name="tokens", on_delete=models.CASCADE, null=True)
 
-    @property
+    @cached_property
     def total_token_value(self):
         return self.token.value * self.amount
 
@@ -39,7 +39,7 @@ class TokenInWallet(models.Model):
 class Wallet(models.Model):
     user = models.OneToOneField("User", on_delete=models.CASCADE, related_name="wallet")
 
-    @property
+    @cached_property
     def balance(self):
         total = 0
         for token in self.tokens.all():
@@ -66,3 +66,7 @@ class User(AbstractUser):
 class Transaction(models.Model):
     pass
 ''' from to date amount token'''
+
+
+class TokenHistory(Token):
+    pass

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, Wallet
 import re
 import django.contrib.auth.password_validation as validators
 from rest_framework_simplejwt.serializers import (
@@ -64,13 +64,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        user = User.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email'],
-        )
+        user = User.objects.create(**validated_data)
 
         user.set_password(validated_data['password'])
         user.save()
+
+        Wallet.objects.create(user=user)
 
         return user
 
