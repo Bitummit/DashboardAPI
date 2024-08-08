@@ -1,5 +1,5 @@
 from celery import shared_task
-from DashboardAPI.settings import NUNJAS_API_KEY
+from DashboardAPI.settings import NINJAS_API_KEY
 
 
 @shared_task
