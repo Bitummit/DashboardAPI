@@ -23,7 +23,7 @@ class UserListView(generics.ListAPIView):
     queryset = User.objects.filter(is_staff=False).all().select_related("wallet")
     pagination_class = StandardPagination
     filter_backends = [filters.OrderingFilter]
-    ordering_fields = ["pk", "last_name", "email", "wallet__pk", "status"]
+    ordering_fields = ["pk", "last_name", "email", "wallet__balance", "status"]
     ordering = ['-pk']
     # pagination_class = pagination.LimitOffsetPagination
 

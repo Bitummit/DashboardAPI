@@ -40,6 +40,10 @@ class TokenInWallet(models.Model):
         self.wallet.balance += self.total_token_value
         self.wallet.save()
 
+    # def __str__(self):
+    #     return self.wallet
+    
+
 class Wallet(models.Model):
 
     user = models.OneToOneField("User", on_delete=models.CASCADE, related_name="wallet")
