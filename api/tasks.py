@@ -1,7 +1,8 @@
-from celery import shared_task
+from DashboardAPI.celery import app
 from DashboardAPI.settings import NINJAS_API_KEY
+from .models import Token
 
-
-@shared_task
+@app.task
 def get_token_values():
-    pass
+    token = Token.objects.create(short_name="Test", long_name="Long test name", value=3422)
+    token.save()
