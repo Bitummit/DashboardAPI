@@ -142,12 +142,12 @@ CELERY_BROKER_URL = "redis://localhost:6379"
 CELERY_RESULT_BACKEND = "redis://localhost:6379"
 CELERY_TIMEZONE = 'Europe/Moscow'
 
-'''
-https://episyche.com/blog/how-to-run-periodic-tasks-in-django-using-celery
 
-to run shedule task - celery -A DashboardAPI  beat -l info
-to run worker - celery -A DashboardAPI worker -l info
-'''
+# https://episyche.com/blog/how-to-run-periodic-tasks-in-django-using-celery
+
+# to run shedule task - celery -A DashboardAPI  beat -l info
+#to run worker - celery -A DashboardAPI worker -l info
+
 
 CELERY_BEAT_SCHEDULE = { # scheduler configuration 
     'Get_token_values_task' : {  # whatever the name you want 

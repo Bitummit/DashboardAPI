@@ -1,25 +1,30 @@
 from django.shortcuts import render
-from rest_framework import generics, pagination
+from rest_framework import generics, pagination, filters
+from .filters import MyCustomOrdering
 from .models import User
 from .serializers import BaseUserSerializer, ShortUserSerializer, MyTokenObtainPairSerializer, RegisterSerializer
 from .services import StandardPagination
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny
 import time
+
 '''
-users list
+users list - done
 tokens get
 wallet get
 transactions get
-jwt
-user post
+jwt - done
+user post - done
 '''
 
-class UserListView(generics.ListCreateAPIView):
+class UserListView(generics.ListAPIView):
     '''ListCreate'''
     serializer_class = ShortUserSerializer
-    queryset = User.objects.filter(is_staff=False).all().order_by('pk')
+    queryset = User.objects.filter(is_staff=False).all().select_related("wallet")
     pagination_class = StandardPagination
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ["pk", "last_name", "email", "wallet__pk", "status"]
+    ordering = ['-pk']
     # pagination_class = pagination.LimitOffsetPagination
 
     def get_serializer_class(self):
@@ -27,8 +32,6 @@ class UserListView(generics.ListCreateAPIView):
             # time.sleep(2)
             return BaseUserSerializer
         return self.serializer_class
-
-    ''' Create wallet auto adding'''
 
 
 class MyTokenObtainPairView(TokenObtainPairView):

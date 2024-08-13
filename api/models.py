@@ -35,23 +35,19 @@ class TokenInWallet(models.Model):
     def total_token_value(self):
         return self.token.value * self.amount
 
+    def save(self, *args, **kwargs):
+        super(TokenInWallet, self).save(*args, **kwargs)
+        self.wallet.balance += self.total_token_value
+        self.wallet.save()
 
 class Wallet(models.Model):
+
     user = models.OneToOneField("User", on_delete=models.CASCADE, related_name="wallet")
-
-    @cached_property
-    def balance(self):
-        total = 0
-        for token in self.tokens.all():
-            total += token.total_token_value
-        total = "%.2f" % total
-        # total += token.total_token_value for token in self.tokens.all()
-        return total if self.tokens.all() else 0
-
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+        
     def __str__(self):
         return f"{self.user}'s wallet"
     
-
 
 class User(AbstractUser):
     
