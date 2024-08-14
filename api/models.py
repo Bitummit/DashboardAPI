@@ -15,6 +15,12 @@ STATUS_CHOICES = [
     ('Inactive', 'Inactive')
 ]
 
+TRANSACTION_STATUS_CHOICES = [
+    ('Completed', 'Completed'),
+    ('Pending', 'Pending'),
+    ('Canceled', 'Canceled')
+]
+
 
 class Token(models.Model):
     short_name = models.CharField(max_length=16, default="")
@@ -62,10 +68,16 @@ class User(AbstractUser):
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default="Active")
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
 
+    def __str__(self):
+        return self.username
+    
 
 class Transaction(models.Model):
-    pass
-''' from to date amount token'''
+    user_from = models.ForeignKey(User, on_delete=models.CASCADE, related_name="outcoming_transactions")
+    user_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name="incoming_transactions")
+    date = models.DateTimeField(auto_now_add=True, blank=True)
+    amount = models.DecimalField(max_digits=20, decimal_places=10, default=0)
+    status = models.CharField(choices=TRANSACTION_STATUS_CHOICES, max_length=9, default="Pending")
 
 
 class TokenHistory(Token):

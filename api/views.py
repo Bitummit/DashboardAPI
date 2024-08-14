@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework import generics, pagination, filters
 from .filters import MyCustomOrdering
-from .models import User
-from .serializers import BaseUserSerializer, ShortUserSerializer, MyTokenObtainPairSerializer, RegisterSerializer
+from .models import User, Transaction
+from .serializers import TransactionSerializer, BaseUserSerializer, ShortUserSerializer, MyTokenObtainPairSerializer, RegisterSerializer
 from .services import StandardPagination
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny
@@ -27,11 +27,10 @@ class UserListView(generics.ListAPIView):
     ordering = ['-pk']
     # pagination_class = pagination.LimitOffsetPagination
 
-    def get_serializer_class(self):
-        if self.request.method == "GET":
-            # time.sleep(2)
-            return BaseUserSerializer
-        return self.serializer_class
+
+class TransactionCreateView(generics.CreateAPIView):
+    serializer_class = TransactionSerializer
+    queryset = Transaction.objects.all()
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
