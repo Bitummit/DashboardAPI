@@ -6,31 +6,7 @@ from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer
 )
 from rest_framework.validators import UniqueValidator
-
-
-# class UserSerializer(serializers.Serializer):
-#     '''Method to understand Serializer'''
-
-#     email = serializers.EmailField()
-#     login = serializers.CharField(max_length=64)
-#     image = serializers.ImageField()
-#     phone = serializers.CharField(max_length=12)
-#     country = serializers.ChoiceField(choices=COUNTRY_CHOICES)
-#     created_at = serializers.DateTimeField()
-
-#     def create(self, validated_data):
-#         return User.objects.create(**validated_data)
-
-    # def update(self, instance, validated_data):
-
-    #     instance.email = validated_data.get('email', instance.email)
-    #     instance.login = validated_data.get('login', instance.login)
-    #     instance.image = validated_data.get('image', instance.image)
-    #     instance.phone = validated_data.get('phone', instance.phone)
-    #     instance.country = validated_data.get('country', instance.country)
-    #     instance.created_at = validated_data.get('created_at', instance.created_at)
-    #     instance.save()
-    #     return instance
+from django.db import transaction
 
 
 class BaseUserSerializer(serializers.ModelSerializer):
@@ -82,6 +58,11 @@ class TransactionSerializer(serializers.ModelSerializer):
         elif data["amount"] > token.amount:
             raise serializers.ValidationError({"amount": "User don't have such amount!"})
 
+        return data
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            pass
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -103,11 +84,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', "first_name", "last_name", 'email', "country", 'password', 'password2']
 
-    def validate_phone(self, value):
-        validate_phone_number_pattern = "^\\+?[1-9][0-9]{7,14}$"
-        if re.match(validate_phone_number_pattern, value):
-            return value
-        raise serializers.ValidationError("Phone number don't match the pattern")
+    # def validate_phone(self, value):
+    #     validate_phone_number_pattern = "^\\+?[1-9][0-9]{7,14}$"
+    #     if re.match(validate_phone_number_pattern, value):
+    #         return value
+    #     raise serializers.ValidationError("Phone number don't match the pattern")
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -117,16 +98,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        user = User.objects.create(
-            username = validated_data['username'],
-            first_name = validated_data['first_name'],
-            last_name = validated_data['last_name'],
-            email = validated_data['email'],
-            country = validated_data['country'])
-
+        validated_data.pop('password2')
+        user = User.objects.create(**validated_data)
         user.set_password(validated_data['password'])
         user.save()
-
         Wallet.objects.create(user=user)
-
         return user
+
