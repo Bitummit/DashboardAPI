@@ -3,9 +3,9 @@ from rest_framework import generics, pagination, filters
 from .filters import MyCustomOrdering
 from .models import User, Transaction
 from .serializers import TransactionSerializer, BaseUserSerializer, ShortUserSerializer, MyTokenObtainPairSerializer, RegisterSerializer
-from .services import StandardPagination
+from .paginators import StandardPagination
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 import time
 
 '''
@@ -31,6 +31,7 @@ class UserListView(generics.ListAPIView):
 class TransactionCreateView(generics.CreateAPIView):
     serializer_class = TransactionSerializer
     queryset = Transaction.objects.all()
+    permission_classes = (IsAuthenticated, )
 
 
 class MyTokenObtainPairView(TokenObtainPairView):

@@ -79,6 +79,9 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=20, decimal_places=10, default=0)
     status = models.CharField(choices=TRANSACTION_STATUS_CHOICES, max_length=9, default="Pending")
 
+    @property
+    def token(self):
+        pass
 
 class TokenHistory(Token):
     pass
