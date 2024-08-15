@@ -78,10 +78,11 @@ class Transaction(models.Model):
     date = models.DateTimeField(auto_now_add=True, blank=True)
     amount = models.DecimalField(max_digits=20, decimal_places=10, default=0)
     status = models.CharField(choices=TRANSACTION_STATUS_CHOICES, max_length=9, default="Pending")
+    token = models.CharField(max_length=5, default="")
 
-    @property
-    def token(self):
-        pass
+    def __str__(self):
+        return f"Transaction from {self.user_from} to {self.user_to} with {self.token}"
+    
 
 class TokenHistory(Token):
     pass

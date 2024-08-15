@@ -70,7 +70,7 @@ class TransactionSerializer(serializers.Serializer):
         user_from = self.context['request'].user
         user_to = User.objects.get(username=validated_data["user_to"])
         token_base = Token.objects.get(short_name=validated_data["token"])
-        new_transaction = Transaction.objects.create(user_from=user_from, user_to=user_to, amount=validated_data["amount"])
+        new_transaction = Transaction.objects.create(user_from=user_from, user_to=user_to, token=validated_data["token"], amount=validated_data["amount"])
 
         try:
             with transaction.atomic():
