@@ -142,12 +142,12 @@ CELERY_TIMEZONE = 'Europe/Moscow'
 # to run worker - celery -A DashboardAPI worker -l info
 
 
-# CELERY_BEAT_SCHEDULE = { # scheduler configuration 
-#     'Get_token_values_task' : {  # whatever the name you want 
-#         'task': 'api.tasks.get_token_values', # name of task with path
-#         'schedule': crontab(hour=16, minute=24),
-#     },
-# }
+CELERY_BEAT_SCHEDULE = { # scheduler configuration 
+    'Get_token_values_task' : {  # whatever the name you want 
+        'task': 'api.tasks.get_token_values', # name of task with path
+        'schedule': crontab(hour=12, minute=00),
+    },
+}
 
 
 SIMPLE_JWT = {

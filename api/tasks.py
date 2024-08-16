@@ -1,16 +1,28 @@
 from django.db import transaction
+import requests
 
 from DashboardAPI.celery import app
 from DashboardAPI.settings import NINJAS_API_KEY
 from .models import Token
 from celery import shared_task
 
+NINJAS_API_URL = 'https://api.api-ninjas.com/v1'
 
+
+def get_token_price(token_to_search, token_short_name):
+    token_info = requests.get(f"{NINJAS_API_URL}/cryptoprice?symbol={token_to_search}", headers={'X-Api-Key': NINJAS_API_KEY}).json()
+    token = Token.objects.get(short_name=token_short_name)
+    print(NINJAS_API_KEY)
+    print(token_info)
+    token.value = token_info['price']
+    token.save()
 
 @app.task
 def get_token_values():
-    token = Token.objects.create(short_name="Test", long_name="Long test name", value=3422)
-    token.save()
+    get_token_price("BTCUSDT", "BTC")
+    get_token_price("ETHUSDT", "ETH")
+    get_token_price("SOLUSDT", "SOL")
+    get_token_price("LTCUSDT", "LTC")
 
 
 # @app.task    don't work!!!
