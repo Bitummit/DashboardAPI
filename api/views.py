@@ -19,7 +19,7 @@ user post - done
 
 class UserListView(generics.ListAPIView):
     '''ListCreate'''
-    serializer_class = ShortUserSerializer
+    serializer_class = BaseUserSerializer
     queryset = User.objects.filter(is_staff=False).all().select_related("wallet")
     pagination_class = StandardPagination
     filter_backends = [filters.OrderingFilter]

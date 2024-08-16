@@ -12,8 +12,6 @@ NINJAS_API_URL = 'https://api.api-ninjas.com/v1'
 def get_token_price(token_to_search, token_short_name):
     token_info = requests.get(f"{NINJAS_API_URL}/cryptoprice?symbol={token_to_search}", headers={'X-Api-Key': NINJAS_API_KEY}).json()
     token = Token.objects.get(short_name=token_short_name)
-    print(NINJAS_API_KEY)
-    print(token_info)
     token.value = token_info['price']
     token.save()
 
@@ -25,7 +23,7 @@ def get_token_values():
     get_token_price("LTCUSDT", "LTC")
 
 
-# @app.task    don't work!!!
+# @app.task    doesn't work!!!
 # def make_transaction(token_user_from, user_to, amount, token, new_transaction):
 #     with transaction.atomic():
 #         print(token_user_from)

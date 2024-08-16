@@ -3,25 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from functools import cached_property
 
 
-COUNTRY_CHOICES = [
-    ("ru", "Russia"),
-    ("us", "USA"),
-    ("en", "England"),
-    ("fr", "France")
-]
-
-STATUS_CHOICES = [
-    ('Active', 'Active'),
-    ('Inactive', 'Inactive')
-]
-
-TRANSACTION_STATUS_CHOICES = [
-    ('Completed', 'Completed'),
-    ('Pending', 'Pending'),
-    ('Canceled', 'Canceled')
-]
-
-
 class Token(models.Model):
     short_name = models.CharField(max_length=16, default="")
     long_name = models.CharField(max_length=128, default="")
@@ -60,6 +41,16 @@ class Wallet(models.Model):
     
 
 class User(AbstractUser):
+    STATUS_CHOICES = [
+        ('Active', 'Active'),
+        ('Inactive', 'Inactive')
+    ]
+    COUNTRY_CHOICES = [
+        ("ru", "Russia"),
+        ("us", "USA"),
+        ("en", "England"),
+        ("fr", "France")
+    ]
     
     email = models.EmailField(blank=True, unique=True)
     image = models.ImageField(upload_to='static/profiles', blank=True, null=True)
@@ -73,6 +64,12 @@ class User(AbstractUser):
     
 
 class Transaction(models.Model):
+    TRANSACTION_STATUS_CHOICES = [
+        ('Completed', 'Completed'),
+        ('Pending', 'Pending'),
+        ('Canceled', 'Canceled')
+    ]
+
     user_from = models.ForeignKey(User, on_delete=models.CASCADE, related_name="outcoming_transactions")
     user_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name="incoming_transactions")
     date = models.DateTimeField(auto_now_add=True, blank=True)

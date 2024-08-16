@@ -4,8 +4,9 @@ from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer
 )
 from rest_framework import serializers
-# from rest_framework.validators import UniqueValidator
 from django.db import transaction
+
+from .services import get_if_exists
 from .models import (
     User,
     Wallet, 
@@ -53,6 +54,7 @@ class TransactionSerializer(serializers.Serializer):
             raise serializers.ValidationError({"user_to": "No such user!"})
         
         try:
+            # .Prefetch("tokens", queryset=TokenInWallet.objects.select_related("token").filter(token__short_name=attrs["token"]))
             attrs["token_user_from"] = user_from.wallet.tokens.get(token__short_name=attrs["token"])
         except Exception:
             raise serializers.ValidationError({"token": "User don't have such token!"})
@@ -65,9 +67,6 @@ class TransactionSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
-        '''Make users and token fields from another Srializer
-        mb make validated_data[user, token] as object(not string)
-        '''
         user_from = self.context['request'].user
         user_to = validated_data["user_to"]
         token_base = Token.objects.get(short_name=validated_data["token"])
@@ -82,7 +81,7 @@ class TransactionSerializer(serializers.Serializer):
                 token_user_to, created = user_to.wallet.tokens.select_related("token", "wallet").get_or_create(token=token_base, wallet=user_to.wallet)
                 token_user_to.amount += validated_data["amount"]
                 token_user_to.save()
-                
+
                 new_transaction.status = "Completed"
                 new_transaction.save()
         except Exception as e:
