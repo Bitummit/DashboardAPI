@@ -12,8 +12,6 @@ from .models import (
     Transaction,
     Token
 )
-from django.db import connection
-from django.db.models import Prefetch
 
 
 class BaseUserSerializer(serializers.ModelSerializer):
@@ -79,13 +77,12 @@ class TransactionSerializer(serializers.Serializer):
             with transaction.atomic():
                 token_user_from = validated_data["token_user_from"]
                 token_user_from.amount -= validated_data["amount"]
-                print(2)
                 token_user_from.save()
+
                 token_user_to, created = user_to.wallet.tokens.select_related("token", "wallet").get_or_create(token=token_base, wallet=user_to.wallet)
-                print(3)
                 token_user_to.amount += validated_data["amount"]
                 token_user_to.save()
-                print(4)
+                
                 new_transaction.status = "Completed"
                 new_transaction.save()
         except Exception as e:
@@ -93,14 +90,7 @@ class TransactionSerializer(serializers.Serializer):
             new_transaction.status = "Canceled"
             new_transaction.save()
         return new_transaction
-    
 
-
-# class TokenSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = Token
-#         fields = '__all__'
             
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
