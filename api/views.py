@@ -1,5 +1,10 @@
 from django.shortcuts import render
 from rest_framework import generics, pagination, filters
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import AllowAny, IsAuthenticated
+import time
+
 from .filters import MyCustomOrdering
 from .models import User, Transaction, TokenInWallet
 from .serializers import (
@@ -11,9 +16,7 @@ from .serializers import (
     TokenInWalletSerializer
 )
 from .paginators import StandardPagination
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.permissions import AllowAny, IsAuthenticated
-import time
+
 
 '''
 users list - done
@@ -41,11 +44,16 @@ class TransactionCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, )
 
 
-class CreateTokenInWallet(generics.CreateAPIView):
+class CreateTokenInWallet(generics.ListCreateAPIView):
     serializer_class = TokenInWalletSerializer
     queryset = TokenInWallet.objects.all()
     permission_classes = (IsAuthenticated, )
 
+    def list(self, request):
+        queryset = TokenInWallet.objects.select_related("wallet", "wallet__user").filter(wallet__user=request.user)
+        serializer = TokenInWalletSerializer(queryset, many=True)
+        return Response(serializer.data)
+    
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer

@@ -101,12 +101,22 @@ class TokenInWalletSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         # token = Token.objects.get(pk=validated_data['token'])
-        token = TokenInWallet.objects.create(
-            amount = validated_data['amount'],
-            token = validated_data['token'],    
-            wallet = user.wallet
-        )
-
+        token = TokenInWallet.objects.filter(wallet=user.wallet, token = validated_data['token']).first()
+        print(token)
+        if token:
+            token.amount += validated_data['amount']
+            token.save()
+        else:
+            token = TokenInWallet.objects.create(
+                amount = validated_data['amount'],
+                token = validated_data['token'],    
+                wallet = user.wallet
+            )
+        '''
+            ...
+            Some payment code
+            ...
+        '''
         return token
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
