@@ -34,6 +34,7 @@ class TokenInWallet(models.Model):
             return s
 
     def save(self, *args, **kwargs):
+        self.wallet.balance -= self.total_token_value
         super(TokenInWallet, self).save(*args, **kwargs)
         self.wallet.balance += self.total_token_value
         self.wallet.save()

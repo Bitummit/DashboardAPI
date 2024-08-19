@@ -6,14 +6,15 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 import time
 
 from .filters import MyCustomOrdering
-from .models import User, Transaction, TokenInWallet
+from .models import User, Transaction, TokenInWallet, Wallet
 from .serializers import (
     TransactionSerializer,
     BaseUserSerializer, 
     ShortUserSerializer, 
     MyTokenObtainPairSerializer, 
     RegisterSerializer,
-    TokenInWalletSerializer
+    TokenInWalletSerializer,
+    WalletSerializer
 )
 from .paginators import StandardPagination
 
@@ -44,7 +45,7 @@ class TransactionCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, )
 
 
-class CreateTokenInWallet(generics.ListCreateAPIView):
+class CreateTokenInWalletView(generics.ListCreateAPIView):
     serializer_class = TokenInWalletSerializer
     queryset = TokenInWallet.objects.all()
     permission_classes = (IsAuthenticated, )
@@ -53,6 +54,12 @@ class CreateTokenInWallet(generics.ListCreateAPIView):
         queryset = TokenInWallet.objects.select_related("wallet", "wallet__user").filter(wallet__user=request.user)
         serializer = TokenInWalletSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class RetriveBalanceView(generics.RetrieveAPIView):
+    queryset = Wallet.objects.all()
+    serializer_class = WalletSerializer
+    permission_classes = (IsAuthenticated, )
     
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -64,7 +71,3 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
 
-
-'''
-Update token price with celery -> create tokenHistory entity -> update token
-'''

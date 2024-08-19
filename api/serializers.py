@@ -93,16 +93,16 @@ class TransactionSerializer(serializers.Serializer):
 
 
 class TokenInWalletSerializer(serializers.ModelSerializer):
-
+    token = serializers.SlugRelatedField('short_name', read_only=True)
     class Meta:
         model = TokenInWallet
-        fields = ['token', 'amount']
+        fields = ['token', 'amount', 'total_token_value']
 
     def create(self, validated_data):
         user = self.context['request'].user
         # token = Token.objects.get(pk=validated_data['token'])
         token = TokenInWallet.objects.filter(wallet=user.wallet, token = validated_data['token']).first()
-        print(token)
+
         if token:
             token.amount += validated_data['amount']
             token.save()
@@ -118,6 +118,13 @@ class TokenInWalletSerializer(serializers.ModelSerializer):
             ...
         '''
         return token
+
+
+class WalletSerializer(serializers.ModelSerializer):
+    tokens = TokenInWalletSerializer(many=True)
+    class Meta:
+        model = Wallet
+        fields = ["balance", "tokens"]
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     '''Token get view'''
