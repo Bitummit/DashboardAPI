@@ -1,12 +1,23 @@
 from django.shortcuts import render
 from rest_framework import generics, pagination, filters
-from .filters import MyCustomOrdering
-from .models import User, Transaction
-from .serializers import TransactionSerializer, BaseUserSerializer, ShortUserSerializer, MyTokenObtainPairSerializer, RegisterSerializer
-from .paginators import StandardPagination
+from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 import time
+
+from .filters import MyCustomOrdering
+from .models import User, Transaction, TokenInWallet, Wallet
+from .serializers import (
+    TransactionSerializer,
+    BaseUserSerializer, 
+    ShortUserSerializer, 
+    MyTokenObtainPairSerializer, 
+    RegisterSerializer,
+    TokenInWalletSerializer,
+    WalletSerializer
+)
+from .paginators import StandardPagination
+
 
 '''
 users list - done
@@ -19,7 +30,7 @@ user post - done
 
 class UserListView(generics.ListAPIView):
     '''ListCreate'''
-    serializer_class = ShortUserSerializer
+    serializer_class = BaseUserSerializer
     queryset = User.objects.filter(is_staff=False).all().select_related("wallet")
     pagination_class = StandardPagination
     filter_backends = [filters.OrderingFilter]
@@ -34,6 +45,23 @@ class TransactionCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, )
 
 
+class CreateTokenInWalletView(generics.ListCreateAPIView):
+    serializer_class = TokenInWalletSerializer
+    queryset = TokenInWallet.objects.all()
+    permission_classes = (IsAuthenticated, )
+
+    def list(self, request):
+        queryset = TokenInWallet.objects.select_related("wallet", "wallet__user").filter(wallet__user=request.user)
+        serializer = TokenInWalletSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class RetriveBalanceView(generics.RetrieveAPIView):
+    queryset = Wallet.objects.all()
+    serializer_class = WalletSerializer
+    permission_classes = (IsAuthenticated, )
+    
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
@@ -43,7 +71,3 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
 
-
-'''
-Update token price with celery -> create tokenHistory entity -> update token
-'''

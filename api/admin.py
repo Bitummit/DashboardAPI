@@ -4,12 +4,23 @@ from .models import (
     User, 
     Transaction,
     Wallet,
-    TokenInWallet
+    TokenInWallet,
+    TokenHistory
 )
 
 
-admin.site.register(Token)
+@admin.register(Token)
+class TokenAdmin(admin.ModelAdmin):
+    readonly_fields =  ('check_date',) 
+
+
+@admin.register(TokenHistory)
+class TokenHistoryAdmin(admin.ModelAdmin):
+    readonly_fields =  ('check_date',)
+
+
 admin.site.register(User)
 admin.site.register(Transaction)
 admin.site.register(Wallet)
 admin.site.register(TokenInWallet)
+

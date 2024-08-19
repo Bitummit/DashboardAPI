@@ -11,7 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 SECRET_KEY = os.getenv('SECRET_KEY')
-NINJAS_API_KEY = os.getenv('NINJAS_API_KEY')
+FIRST_PART_NINJAS_API_KEY = os.getenv('FIRST_PART_NINJAS_API_KEY')
+SECOND_PART_NINJAS_API_KEY = os.getenv('SECOND_PART_NINJAS_API_KEY')
 
 DEBUG = True
 
@@ -33,6 +34,7 @@ INSTALLED_APPS = [
     'rest_framework',
     "corsheaders",
     'rest_framework_simplejwt.token_blacklist',
+    "debug_toolbar",
     'api',
 ]
 
@@ -41,10 +43,17 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
 ]
 
 ROOT_URLCONF = 'DashboardAPI.urls'
@@ -96,6 +105,8 @@ AUTH_USER_MODEL = 'api.User'
 
 LANGUAGE_CODE = 'en-us'
 
+DATETIME_FORMAT = '%d-%m-%Y %H:%M:%S'
+
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
@@ -137,7 +148,7 @@ CELERY_TIMEZONE = 'Europe/Moscow'
 CELERY_BEAT_SCHEDULE = { # scheduler configuration 
     'Get_token_values_task' : {  # whatever the name you want 
         'task': 'api.tasks.get_token_values', # name of task with path
-        'schedule': crontab(hour=16, minute=24),
+        'schedule': crontab(hour=18, minute=2),
     },
 }
 
@@ -172,4 +183,9 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 }

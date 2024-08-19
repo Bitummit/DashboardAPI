@@ -4,15 +4,16 @@ from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer
 )
 from rest_framework import serializers
-# from rest_framework.validators import UniqueValidator
 from django.db import transaction
+
+from .services import get_if_exists
 from .models import (
     User,
     Wallet, 
     Transaction,
-    Token
+    Token,
+    TokenInWallet
 )
-
 
 
 class BaseUserSerializer(serializers.ModelSerializer):
@@ -49,54 +50,79 @@ class TransactionSerializer(serializers.Serializer):
         if not user_from:
             raise serializers.ValidationError({"user_from": "Not authenticated!"})
         try:
-            user_to = User.objects.get(username=attrs["user_to"])
+            attrs["user_to"] = User.objects.select_related("wallet").get(username=attrs["user_to"])
         except Exception:
             raise serializers.ValidationError({"user_to": "No such user!"})
         
         try:
-            token = user_from.wallet.tokens.get(token__short_name=attrs["token"])
+            # .Prefetch("tokens", queryset=TokenInWallet.objects.select_related("token").filter(token__short_name=attrs["token"]))
+            attrs["token_user_from"] = user_from.wallet.tokens.get(token__short_name=attrs["token"])
         except Exception:
             raise serializers.ValidationError({"token": "User don't have such token!"})
         
         if attrs["amount"] < 0:
             raise serializers.ValidationError({"amount": "Amount can't be less then 0!"})
-        elif attrs["amount"] > token.amount:
+        elif attrs["amount"] > attrs["token_user_from"].amount:
             raise serializers.ValidationError({"amount": "User don't have such amount!"})
 
         return attrs
 
     def create(self, validated_data):
-        '''Make users and token fileds from another Srializer'''
         user_from = self.context['request'].user
-        user_to = User.objects.get(username=validated_data["user_to"])
+        user_to = validated_data["user_to"]
         token_base = Token.objects.get(short_name=validated_data["token"])
-        new_transaction = Transaction.objects.create(user_from=user_from, user_to=user_to, amount=validated_data["amount"])
+        new_transaction = Transaction.objects.create(user_from=user_from, user_to=user_to, token=validated_data["token"], amount=validated_data["amount"])
 
         try:
             with transaction.atomic():
-                token_user_from = user_from.wallet.tokens.get(token=token_base)
+                token_user_from = validated_data["token_user_from"]
                 token_user_from.amount -= validated_data["amount"]
                 token_user_from.save()
-                token_user_to, created = user_to.wallet.tokens.get_or_create(token=token_base, wallet=user_to.wallet)
+                token_user_to, created = user_to.wallet.tokens.select_related("token", "wallet").get_or_create(token=token_base, wallet=user_to.wallet)
                 token_user_to.amount += validated_data["amount"]
                 token_user_to.save()
-
                 new_transaction.status = "Completed"
                 new_transaction.save()
-        except Exception:
+        except Exception as e:
+            print(e)
             new_transaction.status = "Canceled"
             new_transaction.save()
-
         return new_transaction
-    
 
 
-# class TokenSerializer(serializers.ModelSerializer):
+class TokenInWalletSerializer(serializers.ModelSerializer):
+    # token = serializers.SlugRelatedField('short_name', read_only=True)
+    class Meta:
+        model = TokenInWallet
+        fields = ['token', 'amount', 'total_token_value']
 
-#     class Meta:
-#         model = Token
-#         fields = '__all__'
-            
+    def create(self, validated_data):
+        user = self.context['request'].user
+        # token = Token.objects.get(pk=validated_data['token'])
+        token = TokenInWallet.objects.filter(wallet=user.wallet, token = validated_data['token']).first()
+
+        if token:
+            token.amount += validated_data['amount']
+            token.save()
+        else:
+            token = TokenInWallet.objects.create(
+                amount = validated_data['amount'],
+                token = validated_data['token'],    
+                wallet = user.wallet
+            )
+        '''
+            ...
+            Some payment code
+            ...
+        '''
+        return token
+
+
+class WalletSerializer(serializers.ModelSerializer):
+    tokens = TokenInWalletSerializer(many=True)
+    class Meta:
+        model = Wallet
+        fields = ["balance", "tokens"]
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     '''Token get view'''
