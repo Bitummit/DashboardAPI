@@ -13,34 +13,26 @@ class Token(models.Model):
     def __str__(self):
         return self.short_name
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):   
         super(Token, self).save(*args, **kwargs)
-
-        for item in self.token_in_wallet.all():
-            item.save()
+        for token in self.token_in_wallet.all():
+            token.save()
 
 
 class TokenInWallet(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name="token_in_wallet")
-    amount = models.DecimalField(max_digits=20, decimal_places=10)
+    amount = models.DecimalField(max_digits=20, decimal_places=10, default=0)
     wallet = models.ForeignKey('Wallet', related_name="tokens", on_delete=models.CASCADE, null=True)
 
     @cached_property
     def total_token_value(self):
-
-        with localcontext() as ctx:
-            ctx.prec = 42   # Perform a high precision calculation
-            s = Decimal(self.token.value) * self.amount
-            return s
+        s = self.token.value * self.amount
+        return s
+        
 
     def save(self, *args, **kwargs):
-        self.wallet.balance -= self.total_token_value
         super(TokenInWallet, self).save(*args, **kwargs)
-        self.wallet.balance += self.total_token_value
-        self.wallet.save()
-
-    # def __str__(self):
-    #     return self.wallet
+        self.wallet.update_balance()
     
 
 class Wallet(models.Model):
@@ -50,7 +42,11 @@ class Wallet(models.Model):
         
     def __str__(self):
         return f"{self.user}'s wallet"
-    
+
+    def update_balance(self, *args, **kwargs):
+        self.balance = sum(token.total_token_value for token in self.tokens.all())
+        self.save()
+
 
 class User(AbstractUser):
     STATUS_CHOICES = [

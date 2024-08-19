@@ -78,11 +78,9 @@ class TransactionSerializer(serializers.Serializer):
                 token_user_from = validated_data["token_user_from"]
                 token_user_from.amount -= validated_data["amount"]
                 token_user_from.save()
-
                 token_user_to, created = user_to.wallet.tokens.select_related("token", "wallet").get_or_create(token=token_base, wallet=user_to.wallet)
                 token_user_to.amount += validated_data["amount"]
                 token_user_to.save()
-
                 new_transaction.status = "Completed"
                 new_transaction.save()
         except Exception as e:
@@ -93,7 +91,7 @@ class TransactionSerializer(serializers.Serializer):
 
 
 class TokenInWalletSerializer(serializers.ModelSerializer):
-    token = serializers.SlugRelatedField('short_name', read_only=True)
+    # token = serializers.SlugRelatedField('short_name', read_only=True)
     class Meta:
         model = TokenInWallet
         fields = ['token', 'amount', 'total_token_value']
