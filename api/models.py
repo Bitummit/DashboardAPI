@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from functools import cached_property
+from decimal import localcontext, Decimal
 
 
 class Token(models.Model):
@@ -12,6 +13,12 @@ class Token(models.Model):
     def __str__(self):
         return self.short_name
 
+    def save(self, *args, **kwargs):
+        super(Token, self).save(*args, **kwargs)
+
+        for item in self.token_in_wallet.all():
+            item.save()
+
 
 class TokenInWallet(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name="token_in_wallet")
@@ -20,7 +27,11 @@ class TokenInWallet(models.Model):
 
     @cached_property
     def total_token_value(self):
-        return self.token.value * self.amount
+
+        with localcontext() as ctx:
+            ctx.prec = 42   # Perform a high precision calculation
+            s = Decimal(self.token.value) * self.amount
+            return s
 
     def save(self, *args, **kwargs):
         super(TokenInWallet, self).save(*args, **kwargs)

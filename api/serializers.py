@@ -11,7 +11,8 @@ from .models import (
     User,
     Wallet, 
     Transaction,
-    Token
+    Token,
+    TokenInWallet
 )
 
 
@@ -90,7 +91,23 @@ class TransactionSerializer(serializers.Serializer):
             new_transaction.save()
         return new_transaction
 
-            
+
+class TokenInWalletSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TokenInWallet
+        fields = ['token', 'amount']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        # token = Token.objects.get(pk=validated_data['token'])
+        token = TokenInWallet.objects.create(
+            amount = validated_data['amount'],
+            token = validated_data['token'],    
+            wallet = user.wallet
+        )
+
+        return token
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     '''Token get view'''

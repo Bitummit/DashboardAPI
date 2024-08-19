@@ -7,9 +7,10 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path('users/', views.UserListView.as_view()),
-    path('token/', views.MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('jwt/', views.MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('jwt/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', views.RegisterView.as_view(), name='register'),
 
+    path('token/', views.CreateTokenInWallet.as_view(), name="add_balance"),
     path('transaction/', views.TransactionCreateView.as_view(), name='post_transaction'),
 ]

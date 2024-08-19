@@ -1,8 +1,15 @@
 from django.shortcuts import render
 from rest_framework import generics, pagination, filters
 from .filters import MyCustomOrdering
-from .models import User, Transaction
-from .serializers import TransactionSerializer, BaseUserSerializer, ShortUserSerializer, MyTokenObtainPairSerializer, RegisterSerializer
+from .models import User, Transaction, TokenInWallet
+from .serializers import (
+    TransactionSerializer,
+    BaseUserSerializer, 
+    ShortUserSerializer, 
+    MyTokenObtainPairSerializer, 
+    RegisterSerializer,
+    TokenInWalletSerializer
+)
 from .paginators import StandardPagination
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -31,6 +38,12 @@ class UserListView(generics.ListAPIView):
 class TransactionCreateView(generics.CreateAPIView):
     serializer_class = TransactionSerializer
     queryset = Transaction.objects.all()
+    permission_classes = (IsAuthenticated, )
+
+
+class CreateTokenInWallet(generics.CreateAPIView):
+    serializer_class = TokenInWalletSerializer
+    queryset = TokenInWallet.objects.all()
     permission_classes = (IsAuthenticated, )
 
 

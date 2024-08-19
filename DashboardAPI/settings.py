@@ -148,7 +148,7 @@ CELERY_TIMEZONE = 'Europe/Moscow'
 CELERY_BEAT_SCHEDULE = { # scheduler configuration 
     'Get_token_values_task' : {  # whatever the name you want 
         'task': 'api.tasks.get_token_values', # name of task with path
-        'schedule': crontab(hour=14, minute=31),
+        'schedule': crontab(hour=15, minute=17),
     },
 }
 
