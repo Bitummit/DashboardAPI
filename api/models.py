@@ -7,7 +7,7 @@ class Token(models.Model):
     short_name = models.CharField(max_length=16, default="")
     long_name = models.CharField(max_length=128, default="")
     value = models.DecimalField(max_digits=8, decimal_places=2)
-    check_date = models.DateField(auto_now_add=True, blank=True)
+    check_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.short_name

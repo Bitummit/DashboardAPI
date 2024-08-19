@@ -11,7 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 SECRET_KEY = os.getenv('SECRET_KEY')
-NINJAS_API_KEY = os.getenv('NINJAS_API_KEY')
+FIRST_PART_NINJAS_API_KEY = os.getenv('FIRST_PART_NINJAS_API_KEY')
+SECOND_PART_NINJAS_API_KEY = os.getenv('SECOND_PART_NINJAS_API_KEY')
 
 DEBUG = True
 
@@ -104,6 +105,8 @@ AUTH_USER_MODEL = 'api.User'
 
 LANGUAGE_CODE = 'en-us'
 
+DATETIME_FORMAT = '%d-%m-%Y %H:%M:%S'
+
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
@@ -145,7 +148,7 @@ CELERY_TIMEZONE = 'Europe/Moscow'
 CELERY_BEAT_SCHEDULE = { # scheduler configuration 
     'Get_token_values_task' : {  # whatever the name you want 
         'task': 'api.tasks.get_token_values', # name of task with path
-        'schedule': crontab(hour=12, minute=00),
+        'schedule': crontab(hour=14, minute=31),
     },
 }
 
