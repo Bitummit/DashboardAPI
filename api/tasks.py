@@ -14,9 +14,9 @@ NINJAS_API_URL = 'https://api.api-ninjas.com/v1'
 def get_token_price(token_to_search, token_short_name):
     token_info = requests.get(f"{NINJAS_API_URL}/cryptoprice?symbol={token_to_search}", headers={'X-Api-Key': FIRST_PART_NINJAS_API_KEY + "==" + SECOND_PART_NINJAS_API_KEY}).json()
     token = Token.objects.get(short_name=token_short_name)
-    # token_dict = model_to_dict(token)
-    # token_dict.pop("id")
-    # TokenHistory.objects.create(**token_dict)
+    token_dict = model_to_dict(token)
+    token_dict.pop("id")
+    TokenHistory.objects.create(**token_dict)
     token.value = token_info['price']
     token.check_date = datetime.datetime.now()
     token.save()
