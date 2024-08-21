@@ -40,13 +40,13 @@ class ShortUserSerializer(BaseUserSerializer):
 
 class TransactionSerializer(serializers.Serializer):
     '''Transaction operation'''
+    user_from = serializers.CharField(read_only=True)
     user_to = serializers.CharField(max_length=64)
     token = serializers.CharField(max_length=5)
     amount = serializers.DecimalField(max_digits=20, decimal_places=10)
 
     def validate(self, attrs):
         user_from = self.context['request'].user
-        
         if not user_from:
             raise serializers.ValidationError({"user_from": "Not authenticated!"})
         try:
@@ -90,8 +90,14 @@ class TransactionSerializer(serializers.Serializer):
         return new_transaction
 
 
+class TokenSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Token
+        fields = '__all__'
+
 class TokenInWalletSerializer(serializers.ModelSerializer):
-    # token = serializers.SlugRelatedField('short_name', read_only=True)
+    token = serializers.SlugRelatedField('short_name', queryset=Token.objects.all())
     class Meta:
         model = TokenInWallet
         fields = ['token', 'amount', 'total_token_value']
@@ -99,7 +105,7 @@ class TokenInWalletSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         # token = Token.objects.get(pk=validated_data['token'])
-        token = TokenInWallet.objects.filter(wallet=user.wallet, token = validated_data['token']).first()
+        token = TokenInWallet.objects.filter(wallet=user.wallet, token=validated_data['token']).first()
 
         if token:
             token.amount += validated_data['amount']
