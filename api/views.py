@@ -5,6 +5,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 import time
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
 from .filters import MyCustomOrdering
 from .models import User, Transaction, TokenInWallet, Wallet
@@ -36,6 +38,9 @@ class UserListView(generics.ListAPIView):
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["pk", "last_name", "email", "wallet__balance", "status"]
     ordering = ['-pk']
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ["status"]
+    search_fields = ["last_name", "username", "email",]
     # pagination_class = pagination.LimitOffsetPagination
 
 

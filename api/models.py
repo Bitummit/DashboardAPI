@@ -16,9 +16,8 @@ class TokenBase(models.Model):
     class Meta:
         abstract=True
 
-        
-class Token(TokenBase):
 
+class Token(TokenBase):
 
     def save(self, *args, **kwargs):   
         super(Token, self).save(*args, **kwargs)
