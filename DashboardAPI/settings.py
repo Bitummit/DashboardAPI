@@ -32,9 +32,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    "corsheaders",
+    'django_filters',
+    'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
-    "debug_toolbar",
+    'debug_toolbar',
     'api',
 ]
 
@@ -126,11 +127,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
     # 'DEFAULT_AUTHENTICATION_CLASSES': (
     #     'rest_framework_simplejwt.authentication.JWTAuthentication',
     # ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 10
+    
 }
 
 
@@ -148,7 +151,7 @@ CELERY_TIMEZONE = 'Europe/Moscow'
 CELERY_BEAT_SCHEDULE = { # scheduler configuration 
     'Get_token_values_task' : {  # whatever the name you want 
         'task': 'api.tasks.get_token_values', # name of task with path
-        'schedule': crontab(hour=18, minute=2),
+        'schedule': crontab(hour=9, minute=50),
     },
 }
 

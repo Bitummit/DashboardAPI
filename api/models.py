@@ -4,7 +4,7 @@ from functools import cached_property
 from decimal import localcontext, Decimal
 
 
-class Token(models.Model):
+class TokenBase(models.Model):
     short_name = models.CharField(max_length=16, default="")
     long_name = models.CharField(max_length=128, default="")
     value = models.DecimalField(max_digits=8, decimal_places=2)
@@ -12,6 +12,12 @@ class Token(models.Model):
 
     def __str__(self):
         return self.short_name
+    
+    class Meta:
+        abstract=True
+
+
+class Token(TokenBase):
 
     def save(self, *args, **kwargs):   
         super(Token, self).save(*args, **kwargs)
@@ -89,5 +95,6 @@ class Transaction(models.Model):
         return f"Transaction from {self.user_from} to {self.user_to} with {self.token}"
     
 
-class TokenHistory(Token):
-    pass
+class TokenHistory(TokenBase):
+    check_date = models.DateTimeField(blank=True, null=True)
+

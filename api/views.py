@@ -4,6 +4,9 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 import time
+from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
 from .filters import MyCustomOrdering
 from .models import User, Transaction, TokenInWallet, Wallet
@@ -18,7 +21,6 @@ from .serializers import (
 )
 from .paginators import StandardPagination
 
-
 '''
 users list - done
 tokens get
@@ -29,44 +31,60 @@ user post - done
 '''
 
 class UserListView(generics.ListAPIView):
-    '''ListCreate'''
+
     serializer_class = BaseUserSerializer
     queryset = User.objects.filter(is_staff=False).all().select_related("wallet")
     pagination_class = StandardPagination
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["pk", "last_name", "email", "wallet__balance", "status"]
     ordering = ['-pk']
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ["status"]
+    search_fields = ["last_name", "username", "email",]
     # pagination_class = pagination.LimitOffsetPagination
 
 
-class TransactionCreateView(generics.CreateAPIView):
+class TransactionListCreateView(generics.ListCreateAPIView):
+
     serializer_class = TransactionSerializer
     queryset = Transaction.objects.all()
+    pagination_class = StandardPagination
     permission_classes = (IsAuthenticated, )
+
+    def list(self, request, *args, **kwargs):
+        print(request.user)
+        queryset = Transaction.objects.select_related("user_from", "user_to").filter(Q(user_to=request.user) | Q(user_from=request.user)).order_by("-pk").all()
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
 
 class CreateTokenInWalletView(generics.ListCreateAPIView):
+
     serializer_class = TokenInWalletSerializer
     queryset = TokenInWallet.objects.all()
     permission_classes = (IsAuthenticated, )
 
     def list(self, request):
         queryset = TokenInWallet.objects.select_related("wallet", "wallet__user").filter(wallet__user=request.user)
-        serializer = TokenInWalletSerializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
 
 class RetriveBalanceView(generics.RetrieveAPIView):
+
     queryset = Wallet.objects.all()
     serializer_class = WalletSerializer
     permission_classes = (IsAuthenticated, )
-    
+
 
 class MyTokenObtainPairView(TokenObtainPairView):
+
     serializer_class = MyTokenObtainPairSerializer
 
 #Register User
 class RegisterView(generics.CreateAPIView):
+
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
