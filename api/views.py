@@ -35,10 +35,10 @@ class UserListView(generics.ListAPIView):
     serializer_class = BaseUserSerializer
     queryset = User.objects.filter(is_staff=False).all().select_related("wallet")
     pagination_class = StandardPagination
-    filter_backends = [filters.OrderingFilter]
+    permission_classes = (IsAuthenticated, )
+    filter_backends = [filters.OrderingFilter, DjangoFilterBackend, filters.SearchFilter]
     ordering_fields = ["pk", "last_name", "email", "wallet__balance", "status"]
     ordering = ['-pk']
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["status"]
     search_fields = ["last_name", "username", "email",]
     # pagination_class = pagination.LimitOffsetPagination
@@ -78,9 +78,9 @@ class RetriveBalanceView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated, )
 
 
-class MyTokenObtainPairView(TokenObtainPairView):
+# class MyTokenObtainPairView(TokenObtainPairView):
 
-    serializer_class = MyTokenObtainPairSerializer
+#     serializer_class = MyTokenObtainPairSerializer
 
 #Register User
 class RegisterView(generics.CreateAPIView):
