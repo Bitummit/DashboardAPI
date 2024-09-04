@@ -2,7 +2,7 @@ FROM python:3.10-alpine
 
 ENV PYTHONUNBUFFERED 1
 
-WORKDIR code
+WORKDIR /app/backend/
 
 RUN apk add --no-cache postgresql-dev gcc python3-dev musl-dev
 
